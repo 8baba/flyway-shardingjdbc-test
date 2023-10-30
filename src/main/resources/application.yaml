@@ -1,0 +1,63 @@
+# ???
+spring:
+  autoconfigure:
+    # ?? ?? DruidDataSourceAutoConfigure
+    exclude: com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure
+
+  sharding-sphere:
+    enabled: true
+    datasource:
+      mode:
+        type: Memory
+      schema:
+        name: store
+      names: store,information_schema
+      store:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.alibaba.druid.pool.DruidDataSource
+        username: root
+        password: root
+        url: jdbc:mysql://pigx-mysql:3306/store?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowMultiQueries=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+      information_schema:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.alibaba.druid.pool.DruidDataSource
+        username: root
+        password: root
+        url: jdbc:mysql://pigx-mysql:3306/information_schema?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowMultiQueries=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+
+    props:
+      sql-show: true
+    rules:
+
+      sharding:
+        sharding-algorithms:
+          table-inline:
+            props:
+              algorithm-expression: store_$->{tenant_id}
+            type: INLINE
+        tables:
+          version:
+            actual-data-nodes: store.t_version
+            table-strategy:
+              none:
+          schemata:
+            actual-data-nodes: information_schema.schemata
+            table-strategy:
+              none:
+          tables:
+            actual-data-nodes: information_schema.tables
+            table-strategy:
+              none:
+          store:
+            actual-data-nodes: store.store_1716476137853374465, store.store_1717116448820633602
+            table-strategy:
+              standard:
+                sharding-algorithm-name: table-inline
+                sharding-column: tenant_id
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    clean-disabled: false
+    out-of-order: true
+#    skip-default-callbacks: true
